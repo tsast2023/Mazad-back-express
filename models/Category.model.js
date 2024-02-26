@@ -4,7 +4,7 @@ const BidSchema = new mongoose.Schema({
     NombreDesProduits:{type:String},
     products:{type:String},
     CategoryFille:{type:String},
-    },
+    }, 
     { timestamps: true }
   );
   
