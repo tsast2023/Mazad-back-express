@@ -8,6 +8,6 @@ const BidSchema = new mongoose.Schema({
     { timestamps: true }
   );
   
-  module.exports = mongoose.model("Category", BidSchema, 'category');
+  module.exports = mongoose.model("category", BidSchema, 'category');
 
 

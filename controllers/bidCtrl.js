@@ -25,7 +25,7 @@ const bidCtrl = {
       // Check user balance
       const balance = await findBalanceByUserId(userId);
       if (balance < requiredBalanceForParticipation) {
-        // Define this threshold as per your app's logic
+        
         return res
           .status(403)
           .send({ error: "Insufficient balance to participate" });
@@ -49,6 +49,10 @@ const bidCtrl = {
     }
   },
   join: async (req, res) => {
+    io.on("connection" , (socket)=>{
+      console.log('new user is connected with' , socket.id)
+      io.emit("bidupadte" , socket.id)
+  })
     try {
       const { bidId } = req.params; 
 
@@ -63,40 +67,63 @@ const bidCtrl = {
       res.status(500).send({ error: "Server error" });
     }
   },
-  mise: async (req, res) => {
+mise : async (req, res) => {
     try {
-      const { bidId, amount } = req.body;
-      const userId = req.kauth.grant.access_token.content.sub;
+        const { bidId, amount } = req.body;
+        const userId = req.kauth.grant.access_token.content.sub;
 
-      // Check user balance
-      const balance = await findBalanceByUserId(userId);
-      if (balance < amount) {
-        // Assuming the bid amount cannot exceed the user's current balance
-        return res
-          .status(403)
-          .send({ error: "Insufficient balance for this bid" });
-      }
+        // Check user balance
+        const balance = await findBalanceByUserId(userId);
+        if (balance < amount) {
+            return res.status(403).send({ error: "Insufficient balance for this bid" });
+        }
 
-      const bid = await bids.findById(bidId);
-      if (!bid) {
-        return res.status(404).send({ error: "Bid not found" });
-      }
+        const bid = await bids.findById(bidId);
+        if (!bid) {
+            return res.status(404).send({ error: "Bid not found" });
+        }
 
-      if (amount <= bid.highestBid) {
-        return res
-          .status(400)
-          .send({ error: "Bid must be higher than current highest bid" });
-      }
-      bid.highestBid = amount;
-      bid.highestBidder = userId;
-      await bid.save();
+        // Check if the bid time has ended
+        if (new Date() >= bid.endTime) {
+            return res.status(400).send({ error: "Bid time has ended" });
+        }
 
-      res.json({ message: "Bid successful", newHighestBid: amount });
+        if (amount <= bid.highestBid) {
+            return res.status(400).send({ error: "Bid must be higher than current highest bid" });
+        }
+
+        bid.highestBid = amount;
+        bid.highestBidder = userId;
+
+        // Extend the bid end time by the extensionTime
+        // Assuming extensionTime is in minutes, convert it to milliseconds
+        bid.endTime = new Date(bid.endTime.getTime() + bid.extensionTime * 60000);
+
+        await bid.save();
+
+        // Emit an event with the updated bid information, including the new end time
+        io.emit('bidUpdate', { 
+            bidId: bid._id, 
+            highestBid: amount, 
+            highestBidder: userId,
+            endTime: bid.endTime 
+        });
+
+        res.json({ message: "Bid successful", newHighestBid: amount, newEndTime: bid.endTime });
     } catch (error) {
-      console.log({ msg: error });
-      res.status(500).send({ error: "Server error" });
+        console.log({ msg: error });
+        res.status(500).send({ error: "Server error" });
     }
-  },
+},
+
+misse : (req,res)=>{
+  try {
+    
+  } catch (error) {
+    
+  }
+}
+
 };
 
 module.exports = bidCtrl;
