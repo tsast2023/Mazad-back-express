@@ -14,6 +14,7 @@ const BidSchema = new mongoose.Schema({
     datePublication:{type:Date},
     dateLancement:{type:Date},
     dateFermeture:{type:Date},
+    
     },
     { timestamps: true }
   );

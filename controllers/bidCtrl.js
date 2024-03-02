@@ -1,6 +1,5 @@
 const bids = require("../models/Bid.model");
 
-
 async function findBalanceByUserId(userId) {
     const user = await User.findById(userId);
     return user ? user.balance : null; 
@@ -20,21 +19,21 @@ const bidCtrl = {
   participate: async (req, res) => {
     try {
       const { bidId } = req.params;
-      const userId = req.kauth.grant.access_token.content.sub;
-
+      const userId = req.user.id;
+      const bid = await bids.findById(bidId);
+      if (!bid) {
+        return res.status(404).send({ error: "Bid not found" });
+      }
       // Check user balance
       const balance = await findBalanceByUserId(userId);
-      if (balance < requiredBalanceForParticipation) {
+      if (balance < bid.coutDeParticipation) {
         
         return res
           .status(403)
           .send({ error: "Insufficient balance to participate" });
       }
 
-      const bid = await bids.findById(bidId);
-      if (!bid) {
-        return res.status(404).send({ error: "Bid not found" });
-      }
+      
 
       if (bid.participants.includes(userId)) {
         return res.status(400).send({ error: "User already participating" });
@@ -48,16 +47,14 @@ const bidCtrl = {
       res.status(500).send({ error: "Server error" });
     }
   },
-  join: async (req, res) => {
-    io.on("connection" , (socket)=>{
-      console.log('new user is connected with' , socket.id)
-      io.emit("bidupadte" , socket.id)
-  })
+
+join: async (req, res) => {
+
     try {
       const { bidId } = req.params; 
-
-      if (!req.kauth.grant.access_token.hasRole("bidder")) {
-        return res.status(403).send({ error: "Insufficient permissions" });
+      const bid = await bids.findById(bidId);
+      if (!bid.participants.includes(userId)) {
+        return res.status(403).send({ error: "you are not participating yet in this bid" });
       }
 
       
@@ -70,7 +67,7 @@ const bidCtrl = {
 mise : async (req, res) => {
     try {
         const { bidId, amount } = req.body;
-        const userId = req.kauth.grant.access_token.content.sub;
+        const userId = req.user.id;
 
         // Check user balance
         const balance = await findBalanceByUserId(userId);
@@ -84,7 +81,7 @@ mise : async (req, res) => {
         }
 
         // Check if the bid time has ended
-        if (new Date() >= bid.endTime) {
+        if (new Date() >= bid.dateFermeture) {
             return res.status(400).send({ error: "Bid time has ended" });
         }
 
@@ -115,14 +112,6 @@ mise : async (req, res) => {
         res.status(500).send({ error: "Server error" });
     }
 },
-
-misse : (req,res)=>{
-  try {
-    
-  } catch (error) {
-    
-  }
-}
 
 };
 
