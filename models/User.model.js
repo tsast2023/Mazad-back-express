@@ -6,7 +6,7 @@ const roleUserEnum = ['ROLE_ADMIN', 'ROLE_USER', 'ROLE_BUYER_SELLER'];
 
 const utilisateurSchema = new Schema({
   nomFamille: { type: String, required: true },
-  prenom: { type: String, required: true },
+  Prenom: { type: String, required: true },
   numTel: String,
   email: {
     type: String,
@@ -22,4 +22,4 @@ const utilisateurSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 }, { discriminatorKey: 'type', timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
-module.exports = mongoose.model("Utilisateur" , utilisateurSchema );
+module.exports = mongoose.model("user" , utilisateurSchema );

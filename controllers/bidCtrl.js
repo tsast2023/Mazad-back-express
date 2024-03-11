@@ -24,7 +24,7 @@ const bidCtrl = {
       if (!bid) {
         return res.status(404).send({ error: "Bid not found" });
       }
-      // Check user balance
+      
       const balance = await findBalanceByUserId(userId);
       if (balance < bid.coutDeParticipation) {
         
@@ -33,7 +33,7 @@ const bidCtrl = {
           .send({ error: "Insufficient balance to participate" });
       }
 
-      
+
 
       if (bid.participants.includes(userId)) {
         return res.status(400).send({ error: "User already participating" });
@@ -77,16 +77,16 @@ mise : async (req, res) => {
 
         const bid = await bids.findById(bidId);
         if (!bid) {
-            return res.status(404).send({ error: "Bid not found" });
+            return res.status(404).send({error: "Bid not found"});
         }
 
         // Check if the bid time has ended
         if (new Date() >= bid.dateFermeture) {
-            return res.status(400).send({ error: "Bid time has ended" });
+            return res.status(400).send({error: "Bid time has ended"});
         }
 
         if (amount <= bid.highestBid) {
-            return res.status(400).send({ error: "Bid must be higher than current highest bid" });
+            return res.status(400).send({error: "Bid must be higher than current highest bid"});
         }
 
         bid.highestBid = amount;
@@ -108,8 +108,8 @@ mise : async (req, res) => {
 
         res.json({ message: "Bid successful", newHighestBid: amount, newEndTime: bid.endTime });
     } catch (error) {
-        console.log({ msg: error });
-        res.status(500).send({ error: "Server error" });
+        console.log({msg: error});
+        res.status(500).send({error: "Server error"});
     }
 },
 

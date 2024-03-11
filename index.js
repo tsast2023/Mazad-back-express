@@ -8,6 +8,7 @@ const socket = require("./socket")
 // sockeet
 const server = require('http').createServer(app);
 socket.initializeSocket(server);
+require('dotenv').config()
 
 mongoose.connect("mongodb+srv://tsast2023:ydNrpqZADUIYJP3y@cluster0.b7tqviv.mongodb.net/MAZAD?retryWrites=true&w=majority&appName=Cluster0").then(()=>console.log('data base is connected')).catch((err)=>console.log(err.message))
 
