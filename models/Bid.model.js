@@ -12,11 +12,11 @@ const BidSchema = new mongoose.Schema({
     Remboursement :{type:Boolean},
     NombreParticipant :{type:Number},
     NombreParticipantréel :{type:Number , required:true},
+    participants : [{type:mongoose.Types.ObjectId , ref:"User"}],
     datePublication:{type:Date},
     datedeclenchement :{type:Date},
     datefermeture :{type:Date},
-    extensionTime: {type:Number},
-    
+    extensionTime : {type:Number},
     },
     { timestamps: true }
   );

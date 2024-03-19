@@ -1,13 +1,14 @@
 const bids = require("../models/Bid.model");
-
+const Solde = require('../models/Solde.model')
+const User = require('../models/User.model')
 async function findBalanceByUserId(userId) {
-    const user = await User.findById(userId);
-    return user ? user.balance : null; 
+    const user = await User.findOne(userId).populate("solde");
+    return user ? user.solde : null; 
 }
 
 
 const bidCtrl = {
-  getAll: async (req, res) => {
+getAll: async (req, res) => {
     try {
       const bidss = await bids.find();
       res.json({ allbids: bidss });
@@ -16,7 +17,7 @@ const bidCtrl = {
       res.status(500).send({ error: "Server error" });
     }
   },
-  participate: async (req, res) => {
+participate: async (req, res) => {
     try {
       const { bidId } = req.params;
       const userId = req.user.id;
@@ -26,7 +27,7 @@ const bidCtrl = {
       }
       
       const balance = await findBalanceByUserId(userId);
-      if (balance < bid.coutDeParticipation) {
+      if (balance.soldeMazed < bid.coutDeParticipation) {
         
         return res
           .status(403)
@@ -38,9 +39,13 @@ const bidCtrl = {
       if (bid.participants.includes(userId)) {
         return res.status(400).send({ error: "User already participating" });
       }
-      bid.participants.push(userId);
-      await bid.save();
 
+
+      
+      bid.participants.push(userId);
+      bid.NombreParticipant = bid.NombreParticipant + 1 ;
+      await Solde.findByIdAndUpdate({_id : balance._id} , {soldeMazed: (balance.soldeMazed - bid.coutDeParticipation)})
+      await bid.save();
       res.json({ message: "Participation successful" });
     } catch (error) {
       console.log({ msg: error });
@@ -50,7 +55,7 @@ const bidCtrl = {
 
 join: async (req, res) => {
 
-    try {
+          try {
       const { bidId } = req.params; 
       const bid = await bids.findById(bidId);
       if (!bid.participants.includes(userId)) {
@@ -70,14 +75,14 @@ mise : async (req, res) => {
         const userId = req.user.id;
 
         // Check user balance
-        const balance = await findBalanceByUserId(userId);
-        if (balance < amount) {
-            return res.status(403).send({ error: "Insufficient balance for this bid" });
-        }
-
         const bid = await bids.findById(bidId);
         if (!bid) {
             return res.status(404).send({error: "Bid not found"});
+        }
+
+        const balance = await findBalanceByUserId(userId);
+        if (balance.soldeMazed < bid.CoutClic) {
+            return res.status(403).send({ error: "Insufficient balance for this bid" });
         }
 
         // Check if the bid time has ended

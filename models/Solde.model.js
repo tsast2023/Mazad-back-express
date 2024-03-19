@@ -1,7 +1,7 @@
 const mongoose = require  ("mongoose");
 const SoldeSchema = new mongoose.Schema({
-    soldeMazed : {type:BigInt64Array},
-    soldeAquisition : {type:BigInt64Array}
+    soldeMazed : {type:Number},
+    soldeAquisition : {type:Number}
     }, 
     { timestamps: true }
 );
