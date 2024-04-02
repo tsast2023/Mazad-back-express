@@ -10,6 +10,7 @@ const io = new Server(server);
 // Socket.IO event handling
 io.on('connection', function(socket) {
     console.log('Connected');
+    socket.id = "user"+Math.random(10)
     console.log(`User connected: ${socket.id}`);
 
     socket.on('msg_from_client', function(from, msg) {

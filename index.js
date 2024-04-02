@@ -46,7 +46,9 @@ app.use(
   );
 // Routes
 app.use('/bid', bidRoute);
+app.get('sendddd' , (req,res)=>{
 
+})
 // Start server
 const PORT = process.env.PORT || 7000;
 server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
