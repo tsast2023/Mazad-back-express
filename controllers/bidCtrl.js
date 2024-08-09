@@ -61,9 +61,9 @@ mise : async (req, res) => {
             return res.status(400).send({error: "Bid time has ended"});
         }
 
-        // if (amount <= bid.highestBid) {
-        //     return res.status(400).send({error: "Bid must be higher than current highest bid"});
-        // }
+        if(!bid.participantsSigné.map(user => user.pseudo).includes(pseudo)){
+          return res.status(400).send({error: "you re not participating at this bid"});
+        }
         const encherissement = new Encherissement({
             participant:balance.user._id,
             heureMajoration:Date.now(),
