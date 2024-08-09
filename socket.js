@@ -1,32 +1,29 @@
-const jwt = require('jsonwebtoken');
-const {Server} = require('socket.io')
+const { Server } = require('socket.io');
 
 let io; // Define io outside of the function to make it accessible in the exports
 
 function initializeSocket(server) {
-// Use the Redis adapter with Socket.IO
-const io = new Server(server);
+    io = new Server(server); // Assign io to the created Server instance
 
-// Socket.IO event handling
-io.on('connection', function(socket) {
-    console.log('Connected');
-    socket.id = "user"+Math.random(10)
-    console.log(`User connected: ${socket.id}`);
+    io.on('connection', (socket) => {
+        console.log('Connected');
+        socket.id = "user" + Math.random();
+        console.log(`User connected: ${socket.id}`);
 
-    socket.on('msg_from_client', function(from, msg) {
-        console.log(`Message from user ${socket.id} ` + from, msg);
-        io.to(socket.id).emit('message', 'Hello, specific user!');
+        socket.on('msg_from_client', (from, msg) => {
+            console.log(`Message from user ${socket.id}: ${from}`, msg);
+            io.emit('message', 'Hello, specific user!');
+        });
+
+        socket.on('establish_connection', (token) => {
+            const userToken = token.accesstoken;
+            console.log("userToken:", userToken);
+        });
+
+        socket.on('disconnect', () => {
+            console.log("User disconnected");
+        });
     });
-
-    socket.on('establish_connection', function(token) {
-        const userToken = token.accesstoken;
-        console.log("userToken");
-    });
-
-    socket.on('disconnect', function(msg) {
-        console.log("deleting user");
-    });
-});
 }
 
 module.exports = {

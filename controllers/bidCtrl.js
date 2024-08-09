@@ -1,57 +1,24 @@
 const bids = require("../models/Bid.model");
 const Solde = require('../models/Solde.model')
 const User = require('../models/User.model')
-async function findBalanceByUserId(userId) {
-    const user = await User.findOne(userId).populate("solde");
-    return user ? user.solde : null; 
-}
-
+const Encherissement = require('../models/Encherissement')
+const Transaction = require('../models/Transaction.model');
+const mongoose = require('mongoose');
+const { Types: { ObjectId } } = mongoose;
+const { getIo } = require('../socket');
 
 const bidCtrl = {
-getAll: async (req, res) => {
-    try {
-      const bidss = await bids.find();
-      res.json({ allbids: bidss });
-    } catch (error) {
-      console.log({ msg: error });
-      res.status(500).send({ error: "Server error" });
-    }
-  },
-participate: async (req, res) => {
-    try {
-      const { bidId } = req.params;
-      const userId = req.user.id;
-      const bid = await bids.findById(bidId);
-      if (!bid) {
-        return res.status(404).send({ error: "Bid not found" });
-      }
-      
-      const balance = await findBalanceByUserId(userId);
-      if (balance.soldeMazed < bid.coutDeParticipation) {
-        
-        return res
-          .status(403)
-          .send({ error: "Insufficient balance to participate" });
-      }
 
+    getAll: async(req, res) => {
+        try {
+          const bidss = await Solde.find();
+          res.json(bidss);
+        } catch (error) {
+          console.log({ msg: error });
+          res.status(500).send({ error: "Server error" });
+        }
+      },
 
-
-      if (bid.participants.includes(userId)) {
-        return res.status(400).send({ error: "User already participating" });
-      }
-
-
-      
-      bid.participants.push(userId);
-      bid.NombreParticipant = bid.NombreParticipant + 1 ;
-      await Solde.findByIdAndUpdate({_id : balance._id} , {soldeMazed: (balance.soldeMazed - bid.coutDeParticipation)})
-      await bid.save();
-      res.json({ message: "Participation successful" });
-    } catch (error) {
-      console.log({ msg: error });
-      res.status(500).send({ error: "Server error" });
-    }
-  },
 
 join: async (req, res) => {
 
@@ -71,17 +38,20 @@ join: async (req, res) => {
   },
 mise : async (req, res) => {
     try {
-        const { bidId, amount } = req.body;
+        const { bidId , amount} = req.body;
         const userId = req.user.id;
-
+        console.log(req.body)
+        const balance = await Solde.findOne({ 'user._id': userId }).populate('user._id');
+        console.log(balance);
         // Check user balance
         const bid = await bids.findById(bidId);
         if (!bid) {
             return res.status(404).send({error: "Bid not found"});
         }
 
-        const balance = await findBalanceByUserId(userId);
-        if (balance.soldeMazed < bid.CoutClic) {
+        
+        console.log('solde' , balance)
+        if (balance.soldeMazed < bid.coutClic) {
             return res.status(403).send({ error: "Insufficient balance for this bid" });
         }
 
@@ -90,31 +60,53 @@ mise : async (req, res) => {
             return res.status(400).send({error: "Bid time has ended"});
         }
 
-        if (amount <= bid.highestBid) {
-            return res.status(400).send({error: "Bid must be higher than current highest bid"});
-        }
+        // if (amount <= bid.highestBid) {
+        //     return res.status(400).send({error: "Bid must be higher than current highest bid"});
+        // }
+        const encherissement = new Encherissement({
+            participant:userId,
+            heureMajoration:Date.now(),
+            valeurMajorationUser:amount,
+            montantTot:bid.highestBid+amount
+        })
+        console.log('Encherissement object:', encherissement);
+        // Validate the object manually
+        await encherissement.save();
 
-        bid.highestBid = amount;
-        bid.highestBidder = userId;
+        
+          console.log(amount , new ObjectId(userId) )
+          const updatedBid = await bids.findOneAndUpdate(
+            { _id: bidId },
+            {
+              highestBid: encherissement.montantTot,
+              highestBidder: userId,
+              datefermeture: new Date(bid.datefermeture.getTime() + bid.extensionTime * 60000)
+            },
+            { new: true } // Return the updated document
+          );
+          console.log(updatedBid)
+       
+       
 
-        // Extend the bid end time by the extensionTime
-        // Assuming extensionTime is in minutes, convert it to milliseconds
-        bid.endTime = new Date(bid.endTime.getTime() + bid.extensionTime * 60000);
 
-        await bid.save();
-
-        // Emit an event with the updated bid information, including the new end time
-        io.emit('bidUpdate', { 
-            bidId: bid._id, 
-            highestBid: amount, 
-            highestBidder: userId,
-            endTime: bid.endTime 
-        });
-
-        res.json({ message: "Bid successful", newHighestBid: amount, newEndTime: bid.endTime });
+        const transaction  = new Transaction({
+          acheteur:userId,
+          montantTransaction:amount,
+          actionTransaction:"clic dans une enchère"
+        })
+        await transaction.save();
+        const io = getIo();
+            if (io) {
+                io.emit('bidUpdate', { 
+                    bidId: bid._id, 
+                    highestBid: encherissement.montantTot, 
+                    highestBidder: userId,
+                    endTime: updatedBid.datefermeture 
+                })}
+        res.json({ message: "Bid successful", newHighestBid: encherissement.montantTot, newEndTime: bid.datefermeture });
     } catch (error) {
         console.log({msg: error});
-        res.status(500).send({error: "Server error"});
+        res.status(500).send({error: error});
     }
 },
 

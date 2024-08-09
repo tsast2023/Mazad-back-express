@@ -17,4 +17,4 @@ const AcheteurSchema = new mongoose.Schema({
 }, {
   discriminatorKey: 'userType',
 });
-module.exports = mongoose.model('Utilisateur').discriminator('Acheteur', AcheteurSchema);
+module.exports = mongoose.model('user').discriminator('Acheteur', AcheteurSchema , 'Acheteur');

@@ -14,9 +14,9 @@ const auth = (req, res, next) => {
         
         const secret =process.env.SECRET
         const keyBuffer =Buffer.from(secret, 'hex');
-        console.log("Token:", token);
-        console.log("Expected secret:", secret);
-        console.log("final secret:" , keyBuffer);
+        // console.log("Token:", token);
+        // console.log("Expected secret:", secret);
+        // console.log("final secret:" , keyBuffer);
 
         jwt.verify(token, keyBuffer, (error, user) => {
             if (error) {

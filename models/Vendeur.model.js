@@ -31,11 +31,8 @@ const VendeurSchema = new mongoose.Schema({
   socketId: {
     type: String,
   },
-  solde: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'solde',
-  },
+
 }, {
   discriminatorKey: 'userType',
 });
-module.exports = mongoose.model('Utilisateur').discriminator('Vendeur', VendeurSchema);
+module.exports = mongoose.model('user').discriminator('Vendeur', VendeurSchema , 'Vendeur');

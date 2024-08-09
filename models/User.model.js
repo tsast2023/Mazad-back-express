@@ -19,7 +19,9 @@ const utilisateurSchema = new Schema({
     enum: roleUserEnum,
     required: true
   },
+ 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+
 }, { discriminatorKey: 'type', timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
-module.exports = mongoose.model("user" , utilisateurSchema );
+module.exports = mongoose.model("user" , utilisateurSchema , "user" );

@@ -1,10 +1,26 @@
-const mongoose = require  ("mongoose");
+const mongoose = require('mongoose');
+
+// Define the Solde schema
 const SoldeSchema = new mongoose.Schema({
-    soldeMazed : {type:Number},
-    soldeAquisition : {type:Number}
-    }, 
-    { timestamps: true }
-);
+    soldeMazed: {
+        type: Number,
+        required: true
+    },
+    soldeAquisition: {
+        type: Number,
+        required: true
+    },
+    user: { 
+        type: {
+            _id: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
+        },
+        required: true
+    }
+}, {
+    timestamps: true // Automatically add createdAt and updatedAt fields
+});
+
+
 module.exports = mongoose.model("solde", SoldeSchema, 'solde');
 
 
