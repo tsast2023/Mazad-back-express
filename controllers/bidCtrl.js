@@ -39,10 +39,11 @@ join: async (req, res) => {
 mise : async (req, res) => {
     try {
         const { bidId , amount} = req.body;
-        const userId = req.user.id;
+        const pseudo = req.user.sub;
+        console.log("uuuuu",pseudo)
         console.log(req.body)
-        const balance = await Solde.findOne({ 'user._id': userId }).populate('user._id');
-        console.log(balance);
+        const balance = await Solde.findOne({ 'user.pseudo': pseudo });
+       
         // Check user balance
         const bid = await bids.findById(bidId);
         if (!bid) {
@@ -64,7 +65,7 @@ mise : async (req, res) => {
         //     return res.status(400).send({error: "Bid must be higher than current highest bid"});
         // }
         const encherissement = new Encherissement({
-            participant:userId,
+            participant:balance.user._id,
             heureMajoration:Date.now(),
             valeurMajorationUser:amount,
             montantTot:bid.highestBid+amount
@@ -74,12 +75,12 @@ mise : async (req, res) => {
         await encherissement.save();
 
         
-          console.log(amount , new ObjectId(userId) )
+         
           const updatedBid = await bids.findOneAndUpdate(
             { _id: bidId },
             {
               highestBid: encherissement.montantTot,
-              highestBidder: userId,
+              highestBidder: balance.user ,
               datefermeture: new Date(bid.datefermeture.getTime() + bid.extensionTime * 60000)
             },
             { new: true } // Return the updated document
@@ -90,7 +91,7 @@ mise : async (req, res) => {
 
 
         const transaction  = new Transaction({
-          acheteur:userId,
+          acheteur:balance.user._id,
           montantTransaction:amount,
           actionTransaction:"clic dans une enchère"
         })
@@ -100,7 +101,7 @@ mise : async (req, res) => {
                 io.emit('bidUpdate', { 
                     bidId: bid._id, 
                     highestBid: encherissement.montantTot, 
-                    highestBidder: userId,
+                    highestBidder: balance.user,
                     endTime: updatedBid.datefermeture 
                 })}
         res.json({ message: "Bid successful", newHighestBid: encherissement.montantTot, newEndTime: bid.datefermeture });
