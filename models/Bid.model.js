@@ -70,7 +70,7 @@ const EnchereSchema = new Schema({
     default: false
   },
   highestBidder: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.Mixed,
     ref: 'user' // Assuming you have a User model
   },
   highestBid: Number,

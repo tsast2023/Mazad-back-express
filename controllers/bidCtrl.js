@@ -42,8 +42,8 @@ mise : async (req, res) => {
         const pseudo = req.user.sub;
         console.log("uuuuu",pseudo)
         console.log(req.body)
-        const balance = await Solde.findOne({ 'user.pseudo': pseudo });
-       
+        const balance = await Solde.findOne({ 'user.pseudo': pseudo }).populate('user');
+        console.log('uussserr',balance.user)
         // Check user balance
         const bid = await bids.findById(bidId);
         if (!bid) {
@@ -61,11 +61,11 @@ mise : async (req, res) => {
             return res.status(400).send({error: "Bid time has ended"});
         }
 
-        if(!bid.participantsSigné.map(user => user.pseudo).includes(pseudo)){
-          return res.status(400).send({error: "you re not participating at this bid"});
-        }
+        // if(!bid.participantsSigné.map(user => user.pseudo).includes(pseudo)){
+        //   return res.status(400).send({error: "you re not participating at this bid"});
+        // }
         const encherissement = new Encherissement({
-            participant:balance.user._id,
+            participant:balance.user,
             heureMajoration:Date.now(),
             valeurMajorationUser:amount,
             montantTot:bid.highestBid+amount
