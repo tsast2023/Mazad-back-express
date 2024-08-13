@@ -99,13 +99,8 @@ mise : async (req, res) => {
         await transaction.save();
         const io = getIo();
             if (io) {
-                io.emit('bidUpdate', { 
-                    bidId: bid._id, 
-                    highestBid: encherissement.montantTot, 
-                    highestBidder: balance.user,
-                    endTime: updatedBid.datefermeture 
-                })}
-        res.json({ message: "Bid successful", newHighestBid: encherissement.montantTot, newEndTime: bid.datefermeture });
+                io.emit('bidUpdate', updatedBid)}
+        res.json({ message: "Bid successful", bid: updatedBid });
     } catch (error) {
         console.log({msg: error});
         res.status(500).send({error: error});
