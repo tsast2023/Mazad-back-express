@@ -42,7 +42,7 @@ const EnchereSchema = new Schema({
     ref: 'Acheteur'
   }],
   encherissements: [{
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.Mixed,
     ref: 'Encherissement' // Assuming you have an Encherissement model
   }],
   unite: {
