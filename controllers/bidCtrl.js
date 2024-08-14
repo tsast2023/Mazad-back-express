@@ -79,7 +79,7 @@ mise : async (req, res) => {
           const updatedBid = await bids.findOneAndUpdate(
             { _id: bidId },
             {
-              $unshift: { encherissements: encherissement },
+              $push: { encherissements: encherissement },
               highestBid: encherissement.montantTot,
               highestBidder: balance.user ,
               datefermeture: new Date(bid.datefermeture.getTime() + bid.extensionTime * 60000)
