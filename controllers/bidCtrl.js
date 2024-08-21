@@ -11,7 +11,7 @@ const bidCtrl = {
 
     getAll: async(req, res) => {
         try {
-          const bidss = await Solde.find();
+          const bidss = await bids.find();
           res.json(bidss);
         } catch (error) {
           console.log({ msg: error });
@@ -39,7 +39,7 @@ join: async (req, res) => {
 mise : async (req, res) => {
     try {
         const { bidId , amount} = req.body;
-        const pseudo = req.user.sub;
+        const pseudo = req.user;
         console.log("uuuuu",pseudo)
         console.log(req.body)
         const balance = await Solde.findOne({ 'user.pseudo': pseudo }).populate('user');
@@ -61,9 +61,9 @@ mise : async (req, res) => {
             return res.status(400).send({error: "Bid time has ended"});
         }
 
-        // if(!bid.participantsSigné.map(user => user.pseudo).includes(pseudo)){
-        //   return res.status(400).send({error: "you re not participating at this bid"});
-        // }
+        if(!bid.participantsSigné.map(user => user.pseudo).includes(pseudo)){
+          return res.status(400).send({error: "you re not participating at this bid"});
+        }
         const encherissement = new Encherissement({
             participant:balance.user,
             heureMajoration:Date.now(),
@@ -79,7 +79,7 @@ mise : async (req, res) => {
           const updatedBid = await bids.findOneAndUpdate(
             { _id: bidId },
             {
-              $push: { encherissements: encherissement },
+              $push: { enchérissement: encherissement },
               highestBid: encherissement.montantTot,
               highestBidder: balance.user ,
               datefermeture: new Date(bid.datefermeture.getTime() + bid.extensionTime * 60000)

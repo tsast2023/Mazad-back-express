@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const EncherissementSchema = new Schema({
-  participant: { type: Schema.Types.ObjectId, ref: 'User' }, // Assuming User is another model
+  participant: { type: Schema.Types.Mixed, ref: 'User' }, // Assuming User is another model
   heureMajoration: { type: Date }, // LocalDateTime equivalent in Java is Date in JavaScript
   valeurMajorationUser: { type: Number },
   montantTot: { type: Number }

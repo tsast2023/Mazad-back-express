@@ -41,7 +41,7 @@ const EnchereSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Acheteur'
   }],
-  encherissements: [{
+  enchérissement: [{
     type: Schema.Types.Mixed,
     ref: 'Encherissement' // Assuming you have an Encherissement model
   }],
@@ -77,7 +77,11 @@ const EnchereSchema = new Schema({
   typePaiement: {
     type: Number,
     enum: ["Carte Bancaire" , "PayPal" , "Virement Bancaire"]
-  }
+  },
+  SmsSent: {
+    type: Boolean,
+    default: false
+  },
 });
 
   
