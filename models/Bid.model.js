@@ -33,13 +33,13 @@ const EnchereSchema = new Schema({
     type: Map,
     of: String
   },
-  participantsNonSigne: [{
+  participantNonSignéIds: [{
     type: Schema.Types.ObjectId,
-    ref: 'Acheteur' // Assuming you have an Acheteur model
+    ref: 'user' // Assuming you have an Acheteur model
   }],
-  participantsSigne: [{
+  participantSignéIds: [{
     type: Schema.Types.ObjectId,
-    ref: 'Acheteur'
+    ref: 'user'
   }],
   enchérissement: [{
     type: Schema.Types.Mixed,

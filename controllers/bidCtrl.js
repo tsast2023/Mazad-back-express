@@ -39,19 +39,20 @@ join: async (req, res) => {
 mise : async (req, res) => {
     try {
         const { bidId , amount} = req.body;
-        const pseudo = req.user;
-        console.log("uuuuu",pseudo)
-        console.log(req.body)
-        const balance = await Solde.findOne({ 'user.pseudo': pseudo }).populate('user');
-        console.log('uussserr',balance.user)
+        const pseudo = req.user.sub;
+        // console.log("uuuuu",pseudo)
+        // console.log(req.body)
+        const balance = await Solde.findOne({ 'user.pseudo': pseudo });
+        // console.log('balance:' , balance)
+        // console.log('uussserr',balance.user)
         // Check user balance
-        const bid = await bids.findById(bidId);
+        const bid = await bids.findById(bidId).populate('participantSignéIds');
         if (!bid) {
             return res.status(404).send({error: "Bid not found"});
         }
 
         
-        console.log('solde' , balance)
+        // console.log('solde' , balance)
         if (balance.soldeMazed < bid.coutClic) {
             return res.status(403).send({ error: "Insufficient balance for this bid" });
         }
@@ -60,10 +61,11 @@ mise : async (req, res) => {
         if (new Date() >= bid.dateFermeture) {
             return res.status(400).send({error: "Bid time has ended"});
         }
-
-        if(!bid.participantsSigné.map(user => user.pseudo).includes(pseudo)){
-          return res.status(400).send({error: "you re not participating at this bid"});
-        }
+        console.log("parts:",bid.participantSignéIds);
+        console.log(bid.participantSignéIds.map(user => user.pseudo))
+        // if(!bid.participantSignéIds.map(user => user.pseudo).includes(pseudo)){
+        //   return res.status(400).send({error: "you re not participating at this bid"});
+        // }
         const encherissement = new Encherissement({
             participant:balance.user,
             heureMajoration:Date.now(),

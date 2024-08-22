@@ -12,7 +12,7 @@ const SoldeSchema = new mongoose.Schema({
     },
     user: { 
         type: {
-            _id: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
+            _id: { type: mongoose.Schema.Types.Mixed, ref: 'user', required: true },
         },
         required: true
     }
