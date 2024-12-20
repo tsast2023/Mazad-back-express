@@ -36,71 +36,68 @@ join: async (req, res) => {
       res.status(500).send({ error: "Server error" });
     }
   },
-mise : async (req, res) => {
+  mise: async (req, res) => {
     try {
-        const { bidId , amount} = req.body;
+        const { bidId, amount } = req.body;
         const pseudo = req.user.sub;
-        
+
         const balance = await Solde.findOne({ 'user.pseudo': pseudo });
-        
-        const bid = await bids.findById(bidId).populate('participantSignéIds');
-        if (!bid) {
-            return res.status(404).send({error: "Bid not found"});
+        if (!balance) {
+            return res.status(404).send({ error: "Balance not found" });
         }
 
-        
-       
+        const bid = await bids.findById(bidId).populate('participantIds');
+        if (!bid) {
+            return res.status(404).send({ error: "Bid not found" });
+        }
+
         if (balance.soldeMazed < bid.coutClic) {
             return res.status(403).send({ error: "Insufficient balance for this bid" });
         }
 
-        // Check if the bid time has ended
-        if (new Date() >= bid.dateFermeture) {
-            return res.status(400).send({error: "Bid time has ended"});
+        if (new Date() >= bid.datefermeture) {
+            return res.status(400).send({ error: "Bid time has ended" });
         }
-       
+
+        if ((bid.highestBid || 0) + amount >= bid.prixMazedAchat) {
+            bid.status = "ended";
+            bid.datefermeture = new Date();
+            await bid.save();
+            return res.status(200).send({ message: "Bid ended as highest bid reached the purchase price" });
+        }
+
         const encherissement = new Encherissement({
-            participant:balance.user,
-            heureMajoration:Date.now(),
-            valeurMajorationUser:amount,
-            montantTot:bid.highestBid+amount
-        })
+            participant: balance.user,
+            heureMajoration: Date.now(),
+            valeurMajorationUser: amount,
+            montantTot: (bid.highestBid || 0) + amount
+        });
         console.log('Encherissement object:', encherissement);
-        // Validate the object manually
+
         await encherissement.save();
 
-        
-         
-          const updatedBid = await bids.findOneAndUpdate(
-            { _id: bidId },
-            {
-              $push: { enchérissement: encherissement },
-              highestBid: encherissement.montantTot,
-              highestBidder: balance.user ,
-              datefermeture: new Date(bid.datefermeture.getTime() + bid.extensionTime * 60000)
-            },
-            { new: true } // Return the updated document
-          );
-          console.log(updatedBid)
-       
-       
+        bid.updateBidDetails(encherissement, bid.extensionTime);
+        await bid.save();
 
+        const transaction = new Transaction({
+            acheteur: balance.user._id,
+            montantTransaction: amount,
+            actionTransaction: "clic dans une enchère"
+        });
 
-        const transaction  = new Transaction({
-          acheteur:balance.user._id,
-          montantTransaction:amount,
-          actionTransaction:"clic dans une enchère"
-        })
         await transaction.save();
+
         const io = getIo();
-            if (io) {
-                io.emit('bidUpdate', updatedBid)}
-        res.json({ message: "Bid successful", bid: updatedBid });
+        if (io) {
+            io.emit('bidUpdate', bid);
+        }
+
+        res.json({ message: "Bid successful", bid });
     } catch (error) {
-        console.log({msg: error});
-        res.status(500).send({error: error});
+        console.error({ msg: error });
+        res.status(500).send({ error: "Server error" });
     }
-},
+}
 
 };
 
