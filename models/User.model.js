@@ -19,7 +19,7 @@ const utilisateurSchema = new Schema({
     enum: roleUserEnum,
     required: true
   },
- 
+  photoDeProfil:{type:String},
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 

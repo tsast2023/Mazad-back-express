@@ -10,7 +10,7 @@ const actionTransactionEnum = [
 
 // Transaction schema
 const TransactionSchema = new Schema({
-    acheteur: {type:mongoose.Schema.ObjectId , ref:"acheteur"}, // Embedding Acheteur as an object
+    acheteur: {type:mongoose.Schema.Types.Mixed , ref:"acheteur"}, // Embedding Acheteur as an object
     montantTransaction: {
         type: Number,
         required: true

@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-
-const EnchereSchema = new Schema({
+const enchereSchema = new Schema({
   ref: { type: String, unique: true },
   coutClic: Number,
   coutParticipation: Number,
@@ -12,12 +11,12 @@ const EnchereSchema = new Schema({
   datedeclenchement: Date,
   datefermeture: Date,
   ville: String,
+  delegationAr: String,
   prixMazedOnline: Number,
+  prixMazedAchat: Number,
   nombreParticipantAttendu: Number,
-  nombreParticipantréel: Number,
   extensionTime: Number,
   nombreMois: Number,
-  prixMazedOnlineFinal: Number,
   galerie: [String],
   description: String,
   nomProduit: {
@@ -27,36 +26,27 @@ const EnchereSchema = new Schema({
   },
   categorie: {
     type: Schema.Types.ObjectId,
-    ref: 'Categorie' // Assuming you have a Categorie model
+    ref: 'Categorie'
   },
   critere: {
     type: Map,
     of: String
   },
-  participantNonSignéIds: [{
+  participantIds: [{
     type: Schema.Types.ObjectId,
-    ref: 'user' // Assuming you have an Acheteur model
-  }],
-  participantSignéIds: [{
-    type: Schema.Types.ObjectId,
-    ref: 'user'
-  }],
-  enchérissement: [{
-    type: Schema.Types.Mixed,
-    ref: 'Encherissement' // Assuming you have an Encherissement model
+    ref: 'User'
   }],
   unite: {
     type: String,
-    enum:["Mois" , "Jours" ]
+    enum: ['Mois', 'Jours']
   },
   avocat: String,
-  noataire: String,
+  notaire: String,
   datePublication: Date,
   status: {
     type: String,
-    enum: ["Brouillon" , "Ouverte" , "En_Cours" , "Terminée" , "Annulée" ]
+    enum: ['Brouillon', 'Ouverte', 'En_Cours', 'Terminée', 'Annulée']
   },
-  contractEnchere: String,
   createdAt: {
     type: Date,
     default: Date.now
@@ -69,22 +59,47 @@ const EnchereSchema = new Schema({
     type: Boolean,
     default: false
   },
+  nombreParticipantréel: {
+    type: Number,
+    default: 0
+  },
+  autoFinancement: Number,
+  villeArabe: String,
+  descriptionAr: String,
+  descriptionEn: String,
+  nomProduitAr: String,
+  nomProduitEn: String,
+  critereAr: {
+    type: Map,
+    of: String
+  },
+  critereEn: {
+    type: Map,
+    of: String
+  },
+  traficUtilisateurs: {
+    type: Map,
+    of: Number
+  },
+  delegation: String,
   highestBidder: {
-    type: Schema.Types.Mixed,
-    ref: 'user' // Assuming you have a User model
+    type: Schema.Types.ObjectId,
+    ref: 'User' // Reference to the highest bidder (User model)
   },
   highestBid: Number,
-  typePaiement: {
-    type: Number,
-    enum: ["Carte Bancaire" , "PayPal" , "Virement Bancaire"]
-  },
-  SmsSent: {
-    type: Boolean,
-    default: false
-  },
+}, {
+  timestamps: true
 });
 
-  
-  module.exports = mongoose.model("Enchere", EnchereSchema , "enchere");
+// Custom method to get the number of visits for a specific date
+enchereSchema.methods.obtenirNombreDeVisitesPourDate = function (date) {
+  return this.traficUtilisateurs.get(date.toISOString()) || 0;
+};
 
+// Custom method to log a visit for a specific date
+enchereSchema.methods.enregistrerVisite = function (date) {
+  const dateKey = date.toISOString();
+  this.traficUtilisateurs.set(dateKey, (this.traficUtilisateurs.get(dateKey) || 0) + 1);
+};
 
+module.exports = mongoose.model('Enchere', enchereSchema, 'enchere');
