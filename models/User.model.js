@@ -24,4 +24,4 @@ const utilisateurSchema = new Schema({
   updatedAt: { type: Date, default: Date.now },
 
 }, { discriminatorKey: 'type', timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
-module.exports = mongoose.model("user" , utilisateurSchema , "user" );
+module.exports = mongoose.model("User" , utilisateurSchema , "user" );

@@ -87,6 +87,7 @@ const enchereSchema = new Schema({
     ref: 'User' // Reference to the highest bidder (User model)
   },
   highestBid: Number,
+  SmsSent:false
 }, {
   timestamps: true
 });
@@ -100,6 +101,18 @@ enchereSchema.methods.obtenirNombreDeVisitesPourDate = function (date) {
 enchereSchema.methods.enregistrerVisite = function (date) {
   const dateKey = date.toISOString();
   this.traficUtilisateurs.set(dateKey, (this.traficUtilisateurs.get(dateKey) || 0) + 1);
+};
+// Custom validation method
+enchereSchema.methods.validateBeforeSave = function(callback) {
+  this.validate((err) => {
+    if (err) {
+      console.log('Validation error:', err);
+      return callback(err); // Propagate error to the callback
+    } else {
+      console.log('Validation successful');
+      return callback(null); // No error, validation successful
+    }
+  });
 };
 
 module.exports = mongoose.model('Enchere', enchereSchema, 'enchere');

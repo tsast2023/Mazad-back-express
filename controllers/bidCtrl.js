@@ -41,7 +41,7 @@ join: async (req, res) => {
         const { bidId, amount } = req.body;
         const pseudo = req.user.sub;
 
-        const balance = await Solde.findOne({ 'user.pseudo': pseudo });
+        const balance = await Solde.findOne({ 'user.pseudo': pseudo }).populate('user');
         if (!balance) {
             return res.status(404).send({ error: "Balance not found" });
         }
@@ -49,6 +49,10 @@ join: async (req, res) => {
         const bid = await bids.findById(bidId).populate('participantIds');
         if (!bid) {
             return res.status(404).send({ error: "Bid not found" });
+        }
+
+        if (!bid.participantIds.some(p => p._id.equals(balance.user._id))) {
+            return res.status(403).send({ error: "You are not a participant in this bid" });
         }
 
         if (balance.soldeMazed < bid.coutClic) {
@@ -60,25 +64,39 @@ join: async (req, res) => {
         }
 
         if ((bid.highestBid || 0) + amount >= bid.prixMazedAchat) {
-            bid.status = "ended";
+            bid.status = "Terminée";
             bid.datefermeture = new Date();
-            await bid.save();
+            await bid.save({ validateBeforeSave: false }).catch((err) => {
+              console.error("Error saving bid:", err);
+            });
             return res.status(200).send({ message: "Bid ended as highest bid reached the purchase price" });
         }
 
+        // Create new Encherissement record
         const encherissement = new Encherissement({
-            participant: balance.user,
+            participant: balance.user._id,
             heureMajoration: Date.now(),
             valeurMajorationUser: amount,
             montantTot: (bid.highestBid || 0) + amount
         });
-        console.log('Encherissement object:', encherissement);
 
         await encherissement.save();
+        console.log(encherissement)
+        console.log(balance.user._id)
+        console.log(bid.extensionTime)
+        // ✅ **Updating bid manually instead of `updateBidDetails`**
+        console.log(encherissement.montantTot , balance.user._id , new Date(Date.now() + bid.extensionTime * 1000))
+        bid.highestBid = encherissement.montantTot;
+        bid.highestBidder = balance.user._id;
+        bid.datefermeture = new Date(Date.now() + bid.extensionTime * 1000); // Extend time if needed
 
-        bid.updateBidDetails(encherissement, bid.extensionTime);
-        await bid.save();
-
+        await bid.save({ validateBeforeSave: false }).catch((err) => {
+          console.error("Error saving bid:", err);
+        });
+        // Subtract the bid amount from the user's balance (Solde)
+            balance.soldeMazed -= amount;
+            await balance.save();
+        // Save transaction
         const transaction = new Transaction({
             acheteur: balance.user._id,
             montantTransaction: amount,
@@ -87,6 +105,7 @@ join: async (req, res) => {
 
         await transaction.save();
 
+        // Emit bid update
         const io = getIo();
         if (io) {
             io.emit('bidUpdate', bid);
@@ -94,7 +113,7 @@ join: async (req, res) => {
 
         res.json({ message: "Bid successful", bid });
     } catch (error) {
-        console.error({ msg: error });
+        console.error({ msg: error.errors });
         res.status(500).send({ error: "Server error" });
     }
 }

@@ -1,28 +1,16 @@
-const nodemailer = require('nodemailer');
+// const axios = require('axios'); // You can use axios to make HTTP requests
 
-const sendEmail = async (to, subject, text) => {
-  const transporter = nodemailer.createTransport({
-    service: 'smtp.mail.ovh.ca',
-    port:587, // Or any other email service provider
-    auth: {
-      user: "postmaster@mazed.com.tn",
-      pass: "Mazed@2025" // Your email password
-    },
-  });
+// const sendSMS = async (phoneNumber, message) => {
+//     const apiUrl = `https://www.winsmspro.com/sms/sms/api?action=send-sms&api_key=bWF6ZWQuYXBwbGljYXRpb25AZ21haWwuY29tOkplNmpiQXJucmdmUkJYIU14WihXRy0leFY=&to=${phoneNumber}&from=Bidor&sms=${message}`; // WinSMS API URL
+//      // Replace with your API key from WinSMS
 
-  const mailOptions = {
-    from: "postmaster@mazed.com.tn",
-    to,
-    subject,
-    text,
-  };
+   
+//     try {
+//         const response = await axios.post(apiUrl);
+//         console.log('SMS sent to', phoneNumber, response.data);
+//     } catch (error) {
+//         console.error('Error sending SMS:', error);
+//     }
+// };
 
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log('Email sent to', to);
-  } catch (error) {
-    console.error('Error sending email:', error);
-  }
-};
-
-module.exports = sendEmail;
+// module.exports = sendSMS;

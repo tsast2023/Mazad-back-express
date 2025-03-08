@@ -10,7 +10,7 @@ const session = require('express-session');
 const cron = require('node-cron');
 const Enchere = require("./models/Bid.model");
 // const RedisStore = require('connect-redis').default;
-const sendEmail = require('./sendEmail');
+const sendSMS = require('./sendEmail');
 require('dotenv').config();
 
 // Initialize Express app
@@ -56,44 +56,45 @@ initializeSocket(server);
 app.use('/bid', bidRoute);
 
 // Example Cron Job to handle expired bids
-cron.schedule('* * * * *', async () => {
-    try {
-        console.log("Cron job started");
+// cron.schedule('* * * * *', async () => {
+//     try {
+//         console.log("Cron job started");
 
-        const expiredBids = await Enchere.find({
-            datefermeture: { $lte: new Date() },
-            SmsSent: { $ne: true }, // Ensure email hasn't already been sent
-        }).populate('highestBidder'); // Ensure you get highestBidder details
+//         const expiredBids = await Enchere.find({
+//             datefermeture: { $lte: new Date() },
+//             SmsSent: { $ne: true }, // Ensure SMS hasn't already been sent
+//         }).populate('highestBidder'); // Ensure you get highestBidder details
+        
+//         console.log(`Found ${expiredBids.length} expired bids`);
 
-        console.log(`Found ${expiredBids.length} expired bids`);
+//         for (const bid of expiredBids) {
+//             console.log(`Processing bid with id: ${bid._id}`);
+//             console.log(bid.highestBidder?.numTel) 
+//             if (bid.highestBidder && bid.highestBidder.numTel) { // Ensure there is a phone number
+//                 console.log(`Sending SMS to ${bid.highestBidder.numTel}`);
 
-        for (const bid of expiredBids) {
-            console.log(`Processing bid with id: ${bid._id}`);
-
-            if (bid.highestBidder && bid.highestBidder.email) {
-                console.log(`Sending email to ${bid.highestBidder.email}`);
-
-                // Send an email to the highest bidder
-                sendEmail(
-                    bid.highestBidder.email,
-                    'Congratulations! You won the bid!',
-                    `Dear ${bid.highestBidder.name},\n\nYou have won the bid with an amount of ${bid.highestBid}.`
-                );
+//                 // Send SMS to the highest bidder
+//                 await sendSMS(
+//                     bid.highestBidder.numTel,
+//                     `Congratulations! You won the bid! You have won with an amount of ${bid.highestBid} DT.`
+//                 );
                 
-                // Mark the bid as email sent
-                bid.SmsSent = true;
-                await bid.save();
-                console.log(`Email sent and bid updated: ${bid._id}`);
-            } else {
-                console.log(`No highest bidder or no email for bid: ${bid._id}`);
-            }
-        }
+//                 // Mark the bid as SMS sent
+//                 bid.SmsSent = true;
+//                 await bid.save({ validateBeforeSave: false }).catch((err) => {
+//                     console.error("Error saving bid:", err);
+//                   });
+//                 console.log(`SMS sent and bid updated: ${bid._id}`);
+//             } else {
+//                 console.log(`No phone number for the winner of bid: ${bid._id}`);
+//             }
+//         }
 
-        console.log("Cron job finished");
-    } catch (error) {
-        console.log('Error in cron job:', error);
-    }
-});
+//         console.log("Cron job finished");
+//     } catch (error) {
+//         console.log('Error in cron job:', error);
+//     }
+// });
 
 // Start the application server
 const PORT = process.env.PORT || 7000;
