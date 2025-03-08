@@ -87,7 +87,7 @@ const enchereSchema = new Schema({
     ref: 'User' // Reference to the highest bidder (User model)
   },
   highestBid: Number,
-  SmsSent:false
+  SmsSent:{type:Boolean , default:false}
 }, {
   timestamps: true
 });

@@ -10,7 +10,7 @@ const session = require('express-session');
 const cron = require('node-cron');
 const Enchere = require("./models/Bid.model");
 // const RedisStore = require('connect-redis').default;
-const sendSMS = require('./sendEmail');
+// const sendSMS = require('./sendEmail');
 require('dotenv').config();
 
 // Initialize Express app
