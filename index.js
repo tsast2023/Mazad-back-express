@@ -17,7 +17,7 @@ require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 
-// // Connect to Redis
+// Connect to Redis
 // const redisClient = new Redis({
 //     host: 'clustercfg.redis-cache.k7pfd9.use1.cache.amazonaws.com', // e.g., Redis ElastiCache endpoint
 //     port: 6379,              // Default Redis port
@@ -36,7 +36,7 @@ mongoose.connect("mongodb+srv://brahimsarah43:MazedImmobilier@cluster0.osk4g2r.m
 // Initialize Socket.IO
 initializeSocket(server);
 
-// // Configure Express session with Redis store
+// Configure Express session with Redis store
 // app.use(
 //     session({
 //         secret: process.env.SESSION_SECRET || "SessionSecret", // Secret from environment variables
