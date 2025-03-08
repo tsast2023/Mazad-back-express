@@ -74,7 +74,7 @@ join: async (req, res) => {
 
         // Create new Encherissement record
         const encherissement = new Encherissement({
-            participant: balance.user._id,
+            participant: balance.user,
             heureMajoration: Date.now(),
             valeurMajorationUser: amount,
             montantTot: (bid.highestBid || 0) + amount
@@ -82,7 +82,7 @@ join: async (req, res) => {
 
         await encherissement.save();
         console.log("encherissement._id:",encherissement._id)
-        console.log(balance.user._id)
+        console.log(balance.user._id ,balance.user , balance.user.prenom)
         console.log(bid.extensionTime)
         // ✅ **Updating bid manually instead of `updateBidDetails`**
         console.log(encherissement.montantTot , balance.user._id , new Date(Date.now() + bid.extensionTime * 1000))

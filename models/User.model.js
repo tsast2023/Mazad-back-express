@@ -2,22 +2,21 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Assuming these roles, adjust as needed
-const roleUserEnum = ['ROLE_ADMIN', 'ROLE_USER', 'ROLE_BUYER_SELLER'];
+const roleUserEnum = ['ROLE_ADMIN', 'ROLE_USER', 'ROLE_BUYER_SELLER' , 'Acheteur'];
 
 const utilisateurSchema = new Schema({
-  nomFamille: { type: String, required: true },
-  Prenom: { type: String, required: true },
+  nomFamille: { type: String,  },
+  Prenom: { type: String,  },
   numTel: String,
   email: {
     type: String,
-    required: true,
     match: [/.+\@.+\..+/, 'Please fill a valid email address']
   },
-  motdePasse: { type: String, required: true },
+  motdePasse: { type: String,  },
   role: {
     type: String,
-    enum: roleUserEnum,
-    required: true
+    enum: roleUserEnum
+    
   },
   photoDeProfil:{type:String},
   createdAt: { type: Date, default: Date.now },
