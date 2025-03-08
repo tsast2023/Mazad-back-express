@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const Encherissement = require("../models/Encherissement")
+const Categorie = require('../models/Category.model')
 const enchereSchema = new Schema({
   ref: { type: String, unique: true },
   coutClic: Number,
@@ -24,11 +25,8 @@ const enchereSchema = new Schema({
     required: true,
     maxlength: 25
   },
-  categorie: {
-    type: Schema.Types.ObjectId,
-    ref: 'Categorie'
-  },
-  critere: {
+  categorie:Categorie.schema,
+  critére: {
     type: Map,
     of: String
   },
@@ -69,11 +67,11 @@ const enchereSchema = new Schema({
   descriptionEn: String,
   nomProduitAr: String,
   nomProduitEn: String,
-  critereAr: {
+  critéreAr: {
     type: Map,
     of: String
   },
-  critereEn: {
+  critéreEn: {
     type: Map,
     of: String
   },
