@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-
+const Encherissement = require("../models/Encherissement")
 const enchereSchema = new Schema({
   ref: { type: String, unique: true },
   coutClic: Number,
@@ -87,6 +87,7 @@ const enchereSchema = new Schema({
     ref: 'User' // Reference to the highest bidder (User model)
   },
   highestBid: Number,
+  enchérissement: [Encherissement.schema],
   SmsSent:{type:Boolean , default:false}
 }, {
   timestamps: true

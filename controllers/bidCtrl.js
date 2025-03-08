@@ -81,7 +81,7 @@ join: async (req, res) => {
         });
 
         await encherissement.save();
-        console.log(encherissement)
+        console.log("encherissement._id:",encherissement._id)
         console.log(balance.user._id)
         console.log(bid.extensionTime)
         // ✅ **Updating bid manually instead of `updateBidDetails`**
@@ -89,7 +89,7 @@ join: async (req, res) => {
         bid.highestBid = encherissement.montantTot;
         bid.highestBidder = balance.user._id;
         bid.datefermeture = new Date(Date.now() + bid.extensionTime * 1000); // Extend time if needed
-
+        bid.enchérissement.unshift(encherissement);
         await bid.save({ validateBeforeSave: false }).catch((err) => {
           console.error("Error saving bid:", err);
         });
