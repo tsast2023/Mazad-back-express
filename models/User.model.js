@@ -8,11 +8,11 @@ const utilisateurSchema = new Schema({
   nomFamille: { type: String,  },
   Prenom: { type: String,  },
   numTel: String,
+  pseudo:{type:String},
   email: {
     type: String,
     match: [/.+\@.+\..+/, 'Please fill a valid email address']
   },
-  motdePasse: { type: String,  },
   role: {
     type: String,
     enum: roleUserEnum
