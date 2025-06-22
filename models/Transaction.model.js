@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const User = require('../models/User.model')
 
 // Define the action transaction enum values
 const actionTransactionEnum = [
@@ -10,7 +11,7 @@ const actionTransactionEnum = [
 
 // Transaction schema
 const TransactionSchema = new Schema({
-    acheteur: {type:mongoose.Schema.Types.Mixed , ref:"acheteur"}, // Embedding Acheteur as an object
+    acheteur:User.schema, // Embedding Acheteur as an object
     montantTransaction: {
         type: Number,
         required: true

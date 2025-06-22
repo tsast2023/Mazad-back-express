@@ -17,7 +17,14 @@ function initializeSocket(server) {
     // const subClient = pubClient.duplicate(); // Duplicate the publisher client for subscription
 
     // // Use socket.io Redis adapter
-    // io.adapter(RedisAdapter({ pubClient, subClient }));
+    
+     const pubClient = new Redis({
+        host: 'web02.bidor.info', // Replace with your ElastiCache endpoint
+        port: 6379,
+        password: 'demo@bidor02', // Include this if you've set a password
+    });
+      const subClient = pubClient.duplicate(); 
+    io.adapter(RedisAdapter({ pubClient, subClient }));
 
     io.on('connection', (socket) => {
         console.log('User connected:', socket.id);
